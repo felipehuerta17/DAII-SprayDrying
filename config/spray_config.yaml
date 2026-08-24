@@ -1,0 +1,6 @@
+
+bounds: [[462.0, 3.5e-5], [858.0, 6.5e-5]]
+objective_kinds: ["min","min"]
+labels_x: ["G_kg_h","rd_m"]
+labels_f: ["Energia_kW","Xo_prom_ultimos"]
+save_dir: "./outputs"

@@ -1,0 +1,128 @@
+# 🥛 DAII-SprayDrying: Simulación Fenomenológica y Optimización Multiobjetivo de Secado Spray
+
+[![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Course](https://img.shields.io/badge/DAII-Pontificia%20Universidad%20Católica%20de%20Chile-002B49.svg)](https://educacionprofesional.ing.uc.cl/)
+
+Repositorio oficial del módulo de **Secado por Atomización (*Spray Drying*) y Optimización Multiobjetivo** del **Diplomado en Automática e Informática Industrial (DAII)** de la **Pontificia Universidad Católica de Chile**.
+
+Este paquete incluye la biblioteca computacional modular `spraydrylib` (v2.0), una suite interactiva de Jupyter Notebooks compatibles con **Google Colab (ejecución directa en 1 clic)** y documentación técnica en PDF.
+
+---
+
+## 🚀 Acceso Directo e Interactivo en Google Colab
+
+Puedes ejecutar y experimentar con cualquiera de los notebooks del curso directamente en la nube de Google Colab sin necesidad de instalar nada en tu computadora ni montar manualmente Google Drive:
+
+| # | Notebook | Descripción | Enlace Directo |
+|---|---|---|---|
+| **01** | `01_Modelo_Basico.ipynb` | Simulación del sistema DAE, balances de masa y energía, y perfiles dinámicos. | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/felipehuerta17/DAII-SprayDrying/blob/main/01_Modelo_Basico.ipynb) |
+| **02** | `02_NSAG2_Pareto.ipynb` | Optimización multiobjetivo con algoritmo genético elitista **NSGA-II** (`pymoo`). | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/felipehuerta17/DAII-SprayDrying/blob/main/02_NSAG2_Pareto.ipynb) |
+| **03** | `03_Deseabilidad_Pareto.ipynb` | Optimización biobjetivo mediante la **Función de Deseabilidad Compuesta (DFA)**. | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/felipehuerta17/DAII-SprayDrying/blob/main/03_Deseabilidad_Pareto.ipynb) |
+| **04** | `04_Toma_Decisiones_TOPSIS_DFA.ipynb` | Toma de decisiones multicriterio (**TOPSIS**) y selección de soluciones óptimas de compromiso. | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/felipehuerta17/DAII-SprayDrying/blob/main/04_Toma_Decisiones_TOPSIS_DFA.ipynb) |
+| **05** | `05_Comparacion_Frentes.ipynb` | Comparación y validación cruzada entre los frentes de Pareto de NSGA-II y DFA. | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/felipehuerta17/DAII-SprayDrying/blob/main/05_Comparacion_Frentes.ipynb) |
+
+---
+
+## 📦 Arquitectura de `spraydrylib` (v2.0)
+
+La biblioteca está diseñada con un enfoque modular, interpretable y extensible para docencia e investigación:
+
+```
+DAII-SprayDrying/
+├── spraydrylib/             # Biblioteca principal
+│   ├── __init__.py          # API pública consolidada y retrocompatibilidad
+│   ├── config.py            # Dataclasses OperatingConditions y DryerParameters
+│   ├── properties.py        # Funciones termodinámicas (kA, De, lambda, Cp, Cv)
+│   ├── physics.py           # Balances, contracción de gota, Nu, pérdidas y radiación
+│   ├── model.py             # Clase SprayDryer y contenedor SimulationResult
+│   ├── model_casadi.py      # Integrador DAE con CasADi / IDAS
+│   ├── backends.py          # Detección automática del motor numérico
+│   ├── moo_objectives.py    # Evaluación de funciones objetivo (Energía y Humedad)
+│   ├── desirability.py      # Enfoque Harrington/Derringer DFA
+│   ├── pymoo_problem.py     # Definición de MOOSprayProblem para pymoo
+│   ├── mcdm.py              # Algoritmo TOPSIS y formateo de tablas
+│   └── plotting.py          # Gráficos académicos estandarizados
+├── config/                  # Archivos YAML de configuración
+├── outputs/                 # Directorio de exportación de frentes CSV y figuras
+├── requirements.txt         # Dependencias del proyecto
+└── LICENSE                  # Licencia MIT
+```
+
+---
+
+## 💻 Instalación Local
+
+Si deseas trabajar en tu máquina local o servidor:
+
+```bash
+# 1. Clonar el repositorio
+git clone https://github.com/felipehuerta17/DAII-SprayDrying.git
+cd DAII-SprayDrying
+
+# 2. Instalar dependencias
+pip install -r requirements.txt
+```
+
+---
+
+## 🔬 Ejemplos de Personalización del Modelo Fenomenológico
+
+### 1. Modificar el Número de Nusselt ($Nu$) y Coeficiente de Transferencia $h$
+
+```python
+import numpy as np
+from spraydrylib import SprayDryer, OperatingConditions, DryerParameters
+
+# Definición de correlación empírica dinámica de Ranz-Marshall: Nu = 2 + 0.6*Re^(1/2)*Pr^(1/3)
+def ranz_marshall_nu(k_air, rd, **kwargs):
+    rho_air, mu_air, v_rel, cp_air = 1.05, 2.1e-5, 2.5, 1005.0
+    dp = 2.0 * rd
+    Re = (rho_air * v_rel * dp) / mu_air
+    Pr = (cp_air * mu_air) / k_air
+    return 2.0 + 0.6 * np.sqrt(Re) * (Pr ** (1.0/3.0))
+
+# Instanciar el secador con la correlación personalizada
+dryer = SprayDryer(
+    params=OperatingConditions(G=650/3600.0, ri=50e-6),
+    config=DryerParameters(Nu=ranz_marshall_nu)
+)
+sol = dryer.simulate(tf=400.0)
+sol.plot()
+```
+
+### 2. Agregar Pérdidas Térmicas en Pared ($U_{wall}$) y Radiación ($\varepsilon$)
+
+$$\dot{Q}_{loss} = U_{wall} A_{wall} (T_4 - T_{amb}) + \varepsilon \sigma A_{wall} (T_4^4 - T_{amb}^4)$$
+
+```python
+dryer_real = SprayDryer(
+    params=OperatingConditions(G=650/3600.0),
+    config=DryerParameters(
+        A_wall=15.0,        # Área de pared (m^2)
+        U_wall=8.0,         # Pérdidas convectivas (W/m^2/K)
+        emissivity=0.85     # Radiación térmica superficial
+    )
+)
+res = dryer_real.simulate(tf=400.0)
+print(f"Temperatura final del aire con pérdidas: {res.T4[-1] - 273.15:.2f} °C")
+```
+
+---
+
+## 📖 Referencias Bibliográficas
+
+- Pérez-Correa, J. R., & Farías, F. (1995). *Modelling and control of a spray dryer: a simulation study*. **Food Control**, 6(4), 219–227.
+- Zaror, C. A., & Pérez-Correa, J. R. (1991). *Model based control of centrifugal atomizer spray drying*. **Food Control**, 2(3), 170–175.
+- Deb, K., Pratap, A., Agarwal, S., & Meyarivan, T. (2002). *A fast and elitist multiobjective genetic algorithm: NSGA-II*. **IEEE Trans. Evol. Comput.**, 6(2), 182–197.
+- Derringer, G., & Suich, R. (1980). *Simultaneous Optimization of Several Response Variables*. **Journal of Quality Technology**, 12(4), 214–219.
+- Wang, Z. et al. (2017). *Multi-criteria decision-making in process engineering*. **Ind. Eng. Chem. Res.**, 56, 1234–1245.
+
+---
+
+## 👤 Autor y Contacto
+
+- **Profesor Felipe Huerta** (`fnhuerta@uc.cl`)
+- Diplomado en Automática e Informática Industrial (DAII)
+- Departamento de Ingeniería Química y Bioprocesos / Escuela de Ingeniería
+- **Pontificia Universidad Católica de Chile**
