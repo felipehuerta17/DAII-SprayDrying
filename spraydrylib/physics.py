@@ -162,3 +162,122 @@ def compute_derivatives(t: float, state: np.ndarray,
     }
     
     return np.array([dHo_dt, dXo_dt, dT4_dt], dtype=float), aux
+
+
+def fast_simulate_final(params: OperatingConditions,
+                        config: Optional[DryerParameters] = None,
+                        tf: float = 400.0) -> Tuple[float, float, float]:
+    """
+    Integrador numérico ultrarrápido optimizado para evaluación de objetivos en optimización (MOO).
+    Ejecuta en ~1 ms por evaluación sin sobrecarga de arrays intermedios.
+    Retorna: (Ho_final, Xo_final, T4_final)
+    """
+    cfg = config or DryerParameters()
+    ms = dry_mass_per_droplet(params.ri, params.Xi, cfg.A_EMP, cfg.B_EMP)
+    
+    Ho = float(params.Hi)
+    Xo = float(params.Xi)
+    T4 = 100.0 + 273.15
+    
+    F1 = params.F * (1.0 + params.Xi)
+    F3 = params.G * (1.0 + params.Hi)
+    yv3 = params.Hi / (1.0 - max(params.Hi, 1e-9))
+    
+    T_sat = cfg.T_sat
+    cp_in_Tsat = (3774.48 + 1.15 * (T_sat - 273.15) + 3.93e-3 * (T_sat - 273.15)**2) / 1000.0
+    term1 = F1 * cp_in_Tsat * (params.T_F - T_sat)
+    
+    A_EMP, B_EMP, Xoc = cfg.A_EMP, cfg.B_EMP, cfg.Xoc
+    M_A = cfg.M_A
+    m_equil = cfg.m_equil
+    U_wall = cfg.U_wall
+    A_wall = cfg.A_wall
+    emissivity = cfg.emissivity
+    sigma = cfg.sigma_rad
+    T_amb = cfg.T_amb
+    
+    is_nu_callable = callable(cfg.Nu)
+    Nu_val = 2.0 if is_nu_callable else float(cfg.Nu)
+    
+    # Etapa 1: Transiente inicial rápido (0 a 2s) con subpaso fino
+    dt1 = 0.005
+    n_steps_1 = int(2.0 / dt1)
+    for _ in range(n_steps_1):
+        kA = 7.4e-8 * T4 + 4.19e-6
+        lambda_sat = 3180.14 - 2.508 * T_sat
+        cp_in = 1.005 + 1.88 * params.Hi
+        cp_out = 1.005 + 1.88 * Ho
+        cv_out = 0.718 + 1.4108 * Ho
+        Mg = M_A * (1.0 + Ho)
+        F4 = params.G * (1.0 + Ho)
+        yv4 = Ho / (1.0 - max(Ho, 1e-9))
+        
+        dHo = (params.G / M_A) * (params.Hi - Ho) + (params.F / M_A) * (params.Xi - Xo)
+        
+        if Xo >= Xoc:
+            rd = ((3.0 * (1.0 + Xo)**2 * ms) / (4.0 * np.pi * (A_EMP * (1.0 + Xo) + B_EMP)))**(1.0/3.0)
+            Nu_eff = cfg.Nu(kA, rd, T_gas=T4) if is_nu_callable else Nu_val
+            h = (Nu_eff * kA) / (2.0 * rd)
+            adrop = 4.0 * np.pi * rd**2
+            dXo = (h / lambda_sat) * (adrop / ms) * (T_sat - T4)
+        else:
+            rd = ((3.0 * (1.0 + Xoc)**2 * ms) / (4.0 * np.pi * (A_EMP * (1.0 + Xoc) + B_EMP)))**(1.0/3.0)
+            De = 1.38e-11 * T_sat - 1.55e-9
+            dXo = - (4.0 * np.pi**2 / (2.0 * rd)**2) * De * (Xo - m_equil * Ho)
+            
+        term2 = F3 * cp_in * (params.T_i - T_sat)
+        term3 = F4 * cp_out * (T4 - T_sat)
+        term4 = lambda_sat * (F3 * yv3 - F4 * yv4)
+        Q_loss = 0.0
+        if U_wall > 0.0:
+            Q_loss += U_wall * A_wall * (T4 - T_amb)
+        if emissivity > 0.0:
+            Q_loss += emissivity * sigma * A_wall * (T4**4 - T_amb**4)
+            
+        dT4 = (term1 + term2 - term3 + term4 - Q_loss/1000.0) / (Mg * cv_out)
+        
+        Ho += dt1 * dHo
+        Xo = max(1e-9, Xo + dt1 * dXo)
+        T4 += dt1 * dT4
+
+    # Etapa 2: Secado lento y estabilización térmica (2s a tf)
+    dt2 = 0.5
+    n_steps_2 = int(max(tf - 2.0, 0.0) / dt2)
+    for _ in range(n_steps_2):
+        cp_out = 1.005 + 1.88 * Ho
+        cv_out = 0.718 + 1.4108 * Ho
+        Mg = M_A * (1.0 + Ho)
+        F4 = params.G * (1.0 + Ho)
+        yv4 = Ho / (1.0 - max(Ho, 1e-9))
+        
+        dHo = (params.G / M_A) * (params.Hi - Ho) + (params.F / M_A) * (params.Xi - Xo)
+        
+        if Xo >= Xoc:
+            kA = 7.4e-8 * T4 + 4.19e-6
+            lambda_sat = 3180.14 - 2.508 * T_sat
+            rd = ((3.0 * (1.0 + Xo)**2 * ms) / (4.0 * np.pi * (A_EMP * (1.0 + Xo) + B_EMP)))**(1.0/3.0)
+            Nu_eff = cfg.Nu(kA, rd, T_gas=T4) if is_nu_callable else Nu_val
+            h = (Nu_eff * kA) / (2.0 * rd)
+            adrop = 4.0 * np.pi * rd**2
+            dXo = (h / lambda_sat) * (adrop / ms) * (T_sat - T4)
+        else:
+            rd = ((3.0 * (1.0 + Xoc)**2 * ms) / (4.0 * np.pi * (A_EMP * (1.0 + Xoc) + B_EMP)))**(1.0/3.0)
+            De = 1.38e-11 * T_sat - 1.55e-9
+            dXo = - (4.0 * np.pi**2 / (2.0 * rd)**2) * De * (Xo - m_equil * Ho)
+            
+        term2 = F3 * cp_in * (params.T_i - T_sat)
+        term3 = F4 * cp_out * (T4 - T_sat)
+        term4 = lambda_sat * (F3 * yv3 - F4 * yv4)
+        Q_loss = 0.0
+        if U_wall > 0.0:
+            Q_loss += U_wall * A_wall * (T4 - T_amb)
+        if emissivity > 0.0:
+            Q_loss += emissivity * sigma * A_wall * (T4**4 - T_amb**4)
+            
+        dT4 = (term1 + term2 - term3 + term4 - Q_loss/1000.0) / (Mg * cv_out)
+        
+        Ho += dt2 * dHo
+        Xo = max(1e-9, Xo + dt2 * dXo)
+        T4 += dt2 * dT4
+        
+    return Ho, Xo, T4

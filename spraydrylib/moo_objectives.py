@@ -49,11 +49,11 @@ def two_objectives_vec(x: Sequence[float],
         p = base_params.copy(G=G_kg_s, ri=rd_i)
         
     cfg = config or DryerParameters()
-    sol = simulate(p, tf=tf, n_steps=n_steps, config=cfg)
+    from spraydrylib.physics import fast_simulate_final
+    ho, xo, t4 = fast_simulate_final(p, config=cfg, tf=tf)
     
-    Xo = sol["Xo"]
     f1 = G_kg_s * (p.T_i - cfg.T_amb) * 1.005
-    f2 = float(np.mean(Xo[-20:-1]))
+    f2 = float(xo)
     
     if not np.isfinite(f1) or not np.isfinite(f2):
         return np.array([1e9, 1e9], dtype=float)
