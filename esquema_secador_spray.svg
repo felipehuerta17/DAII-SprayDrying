@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 680" width="100%" height="100%">
+  <!-- Estilos CSS limpios, altamente compatibles con PowerPoint y navegadores -->
+  <style>
+    .bg { fill: #FFFFFF; }
+    .pipe { stroke: #000000; stroke-width: 3.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    .equip { fill: #FFFFFF; stroke: #000000; stroke-width: 3.5; stroke-linejoin: round; stroke-linecap: round; }
+    .equip-grey { fill: #D1D5DB; stroke: #000000; stroke-width: 3.5; stroke-linejoin: round; stroke-linecap: round; }
+    .equip-light { fill: #F3F4F6; stroke: #000000; stroke-width: 3.5; stroke-linejoin: round; stroke-linecap: round; }
+    .tank-fluid { fill: #0078D4; stroke: none; }
+    .spray-cone { stroke: #000000; stroke-width: 3.0; stroke-dasharray: 6,6; stroke-linecap: round; }
+    .label { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; font-size: 22px; font-weight: bold; fill: #000000; text-anchor: middle; }
+    .label-left { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; font-size: 22px; font-weight: bold; fill: #000000; text-anchor: start; }
+    .label-right { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; font-size: 22px; font-weight: bold; fill: #000000; text-anchor: end; }
+  </style>
+
+  <!-- Fondo Blanco -->
+  <rect width="100%" height="100%" class="bg" />
+
+  <!-- =================================================== -->
+  <!-- 1. TUBERÍAS Y LÍNEAS DE PROCESO (CON FLECHAS DIBUJADAS) -->
+  <!-- =================================================== -->
+
+  <!-- [A] Línea de Entrada de Aire: Entrada -> Filtro -->
+  <path class="pipe" d="M 1120 150 L 990 150" />
+  <polygon points="990,150 1010,140 1010,160" fill="#000000" />
+
+  <!-- [B] Filtro -> Dispersor de gas 1 -->
+  <path class="pipe" d="M 890 150 L 805 150" />
+  <polygon points="805,150 825,140 825,160" fill="#000000" />
+
+  <!-- [C] Dispersor 1 -> Calentador -->
+  <path class="pipe" d="M 740 135 L 670 135" />
+  <polygon points="670,135 690,125 690,145" fill="#000000" />
+
+  <!-- [D] Calentador -> Atomizador (Aire caliente al secador) -->
+  <path class="pipe" d="M 600 135 L 440 135" />
+  <polygon points="440,135 460,125 460,145" fill="#000000" />
+
+  <!-- [E] Tanque de alimentación -> Bomba -->
+  <path class="pipe" d="M 100 480 L 100 420 L 200 420" />
+  <polygon points="200,420 180,410 180,430" fill="#000000" />
+
+  <!-- [F] Bomba -> Atomizador (Líquido a secar) -->
+  <path class="pipe" d="M 235 390 L 235 90 L 415 90 L 415 120" />
+  <polygon points="415,120 405,100 425,100" fill="#000000" />
+
+  <!-- [G] Fondo de Cámara de secado -> Entrada lateral Ciclón -->
+  <path class="pipe" d="M 415 480 L 415 520 L 525 520 L 525 410 L 565 410" />
+  <polygon points="565,410 545,400 545,420" fill="#000000" />
+
+  <!-- [H] Ciclón (Salida gas superior) -> Dispersor de gas 2 -->
+  <path class="pipe" d="M 615 350 L 615 320 L 740 320" />
+  <polygon points="740,320 720,310 720,330" fill="#000000" />
+
+  <!-- [I] Dispersor 2 -> Depurador -->
+  <path class="pipe" d="M 800 305 L 890 305" />
+  <polygon points="890,305 870,295 870,315" fill="#000000" />
+
+  <!-- [J] Depurador -> Salida de aire -->
+  <path class="pipe" d="M 970 305 L 1070 305" />
+  <polygon points="1070,305 1050,295 1050,315" fill="#000000" />
+
+  <!-- [K] Descarga Ciclón -> Producto seco -->
+  <path class="pipe" d="M 615 520 L 615 565" />
+  <polygon points="615,565 605,545 625,545" fill="#000000" />
+
+  <!-- [L] Descarga Depurador -> Partículas finas -->
+  <path class="pipe" d="M 930 340 L 930 385" />
+  <polygon points="930,385 920,365 940,365" fill="#000000" />
+
+
+  <!-- =================================================== -->
+  <!-- 2. EQUIPOS DEL PROCESO -->
+  <!-- =================================================== -->
+
+  <!-- (1) TANQUE DE ALIMENTACIÓN -->
+  <g id="tanque">
+    <!-- Líquido azul -->
+    <rect x="35" y="500" width="130" height="60" class="tank-fluid" />
+    <line x1="35" y1="500" x2="165" y2="500" stroke="#004C87" stroke-width="3" />
+    <!-- Contenedor del tanque abierto -->
+    <path d="M 35 460 L 35 560 L 165 560 L 165 460" fill="none" stroke="#000000" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+    <!-- Textos -->
+    <text x="100" y="600" class="label">Tanque de</text>
+    <text x="100" y="628" class="label">alimentación</text>
+  </g>
+
+  <!-- (2) BOMBA DE ALIMENTACIÓN -->
+  <g id="bomba">
+    <!-- Base -->
+    <polygon points="185,465 255,465 235,435 205,435" class="equip-light" />
+    <!-- Cuerpo circular -->
+    <circle cx="220" cy="420" r="30" class="equip-grey" />
+    <!-- Eje / centro -->
+    <circle cx="220" cy="420" r="10" fill="#4B5563" stroke="#000000" stroke-width="2.5" />
+    <!-- Textos -->
+    <text x="220" y="325" class="label">Bomba de</text>
+    <text x="220" y="353" class="label">alimentación</text>
+  </g>
+
+  <!-- (3) CÁMARA DE SECADO Y ATOMIZADOR -->
+  <g id="camara_secador">
+    <!-- Cuerpo cilíndrico superior + tolva cónica inferior -->
+    <path class="equip" d="M 330 140 
+                           L 500 140 
+                           L 500 370 
+                           L 435 480 
+                           L 395 480 
+                           L 330 370 Z" stroke-width="4" />
+    <!-- Bloque Atomizador Superior -->
+    <rect x="380" y="125" width="70" height="18" class="equip-grey" rx="2" stroke-width="3" />
+    <polygon points="400,143 430,143 415,155" fill="#000000" />
+
+    <!-- Aspersión / Spray (Cono de gotas) -->
+    <line x1="415" y1="158" x2="355" y2="245" class="spray-cone" />
+    <line x1="415" y1="158" x2="380" y2="260" class="spray-cone" />
+    <line x1="415" y1="158" x2="403" y2="270" class="spray-cone" />
+    <line x1="415" y1="158" x2="427" y2="270" class="spray-cone" />
+    <line x1="415" y1="158" x2="450" y2="260" class="spray-cone" />
+    <line x1="415" y1="158" x2="475" y2="245" class="spray-cone" />
+
+    <!-- Textos -->
+    <text x="415" y="65" class="label">Atomizador</text>
+    <text x="415" y="320" class="label">Cámara</text>
+    <text x="415" y="348" class="label">de secado</text>
+  </g>
+
+  <!-- (4) FILTRO DE AIRE -->
+  <g id="filtro">
+    <!-- Rombo / Diamante -->
+    <polygon points="940,95 990,150 940,205 890,150" class="equip" stroke-width="3.5" />
+    <!-- Puntos interiores de filtración -->
+    <circle cx="940" cy="130" r="2.5" fill="#000000" />
+    <circle cx="930" cy="145" r="2.5" fill="#000000" />
+    <circle cx="950" cy="145" r="2.5" fill="#000000" />
+    <circle cx="920" cy="155" r="2.5" fill="#000000" />
+    <circle cx="940" cy="155" r="2.5" fill="#000000" />
+    <circle cx="960" cy="155" r="2.5" fill="#000000" />
+    <circle cx="930" cy="165" r="2.5" fill="#000000" />
+    <circle cx="950" cy="165" r="2.5" fill="#000000" />
+    <circle cx="940" cy="175" r="2.5" fill="#000000" />
+    <!-- Texto -->
+    <text x="940" y="65" class="label">Filtro</text>
+  </g>
+
+  <!-- (5) DISPERSOR DE GAS 1 (SOPLADOR SUPERIOR) -->
+  <g id="dispersor_1">
+    <!-- Carcasa circular -->
+    <circle cx="770" cy="150" r="28" class="equip-light" stroke-width="3.5" />
+    <!-- Salida tangencial izquierda -->
+    <path d="M 770 122 L 740 122 L 740 148 L 770 148" fill="#F3F4F6" stroke="#000000" stroke-width="3.5" />
+    <!-- Centro -->
+    <circle cx="770" cy="150" r="10" class="equip-grey" stroke-width="2.5" />
+    <!-- Textos -->
+    <text x="770" y="65" class="label">Dispersor</text>
+    <text x="770" y="93" class="label">de gas</text>
+  </g>
+
+  <!-- (6) CALENTADOR -->
+  <g id="calentador">
+    <!-- Círculo intercambiador -->
+    <circle cx="635" cy="135" r="34" class="equip" stroke-width="3.5" />
+    <!-- Serpentín calefactor -->
+    <path d="M 615 150 C 615 130, 628 130, 628 138 C 628 148, 642 148, 642 138 C 642 128, 655 128, 655 145" 
+          fill="none" stroke="#000000" stroke-width="3.5" stroke-linecap="round" />
+    <!-- Flecha diagonal de ajuste -->
+    <line x1="610" y1="165" x2="660" y2="105" stroke="#000000" stroke-width="3" />
+    <polygon points="660,105 645,108 655,118" fill="#000000" />
+    <polygon points="610,165 625,162 615,152" fill="#000000" />
+    <!-- Texto -->
+    <text x="635" y="65" class="label">Calentador</text>
+  </g>
+
+  <!-- (7) CICLÓN -->
+  <g id="ciclon">
+    <!-- Cuello superior (vortex finder) -->
+    <rect x="600" y="350" width="30" height="20" class="equip-light" stroke-width="3" />
+    <!-- Entrada lateral rectangular -->
+    <rect x="565" y="395" width="25" height="30" class="equip-light" stroke-width="3" />
+    <!-- Cuerpo cilíndrico -->
+    <rect x="575" y="370" width="80" height="35" class="equip-light" stroke-width="3.5" />
+    <!-- Cono inferior -->
+    <polygon points="575,405 655,405 625,520 605,520" class="equip" stroke-width="3.5" />
+    <!-- Textos -->
+    <text x="670" y="465" class="label-left">Ciclón</text>
+    <text x="615" y="605" class="label">Producto</text>
+    <text x="615" y="633" class="label">seco</text>
+  </g>
+
+  <!-- (8) DISPERSOR DE GAS 2 (EXTRACTOR INFERIOR) -->
+  <g id="dispersor_2">
+    <!-- Carcasa circular -->
+    <circle cx="770" cy="320" r="28" class="equip-light" stroke-width="3.5" />
+    <!-- Salida tangencial derecha -->
+    <path d="M 770 292 L 800 292 L 800 318 L 770 318" fill="#F3F4F6" stroke="#000000" stroke-width="3.5" />
+    <!-- Centro -->
+    <circle cx="770" cy="320" r="10" class="equip-grey" stroke-width="2.5" />
+    <!-- Textos -->
+    <text x="770" y="235" class="label">Dispersor</text>
+    <text x="770" y="263" class="label">de gas</text>
+  </g>
+
+  <!-- (9) DEPURADOR -->
+  <g id="depurador">
+    <!-- Caja del depurador / filtro -->
+    <rect x="890" y="270" width="80" height="70" class="equip" stroke-width="3.5" />
+    <!-- Matriz de puntos interiores -->
+    <circle cx="910" cy="290" r="2.5" fill="#000000" />
+    <circle cx="930" cy="290" r="2.5" fill="#000000" />
+    <circle cx="950" cy="290" r="2.5" fill="#000000" />
+    <circle cx="910" cy="305" r="2.5" fill="#000000" />
+    <circle cx="930" cy="305" r="2.5" fill="#000000" />
+    <circle cx="950" cy="305" r="2.5" fill="#000000" />
+    <circle cx="910" cy="320" r="2.5" fill="#000000" />
+    <circle cx="930" cy="320" r="2.5" fill="#000000" />
+    <circle cx="950" cy="320" r="2.5" fill="#000000" />
+    <!-- Textos -->
+    <text x="930" y="235" class="label">Depurador</text>
+    <text x="930" y="425" class="label">Partículas</text>
+    <text x="930" y="453" class="label">finas</text>
+  </g>
+
+  <!-- (10) TEXTOS GENERALES DE ENTRADA Y SALIDA -->
+  <g id="textos_extremos">
+    <text x="1135" y="142" class="label-left">Entrada</text>
+    <text x="1135" y="170" class="label-left">de aire</text>
+
+    <text x="1085" y="297" class="label-left">Salida de</text>
+    <text x="1085" y="325" class="label-left">aire</text>
+  </g>
+
+</svg>
