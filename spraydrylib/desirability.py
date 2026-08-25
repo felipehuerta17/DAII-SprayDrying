@@ -95,16 +95,16 @@ def build_obj2(tf: float = 400.0,
         else:
             p = base_params.copy(G=G_kg_s, ri=rd_i)
             
-        from spraydrylib.physics import fast_simulate_final
-        ho, xo, t4 = fast_simulate_final(p, config=cfg, tf=float(tf))
+        sol = simulate(p, tf=float(tf), n_steps=int(n_steps), config=cfg)
+        Xo = np.asarray(sol["Xo"], float)
         f1 = G_kg_s * (p.T_i - cfg.T_amb) * 1.005
-        f2 = float(xo)
+        f2 = float(np.mean(Xo[-20:-1]))
         
         if not np.isfinite(f1) or not np.isfinite(f2):
             f1, f2 = 1e12, 1e12
         return np.array([f1, f2], float)
         
-    return obj2, "fast_rk"
+    return obj2, backend
 
 def estimate_LU(samples_F: np.ndarray, pad_ratio: float = 0.05) -> Tuple[np.ndarray, np.ndarray]:
     """

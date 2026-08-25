@@ -63,7 +63,6 @@ class MOOSprayProblem(Problem):
         self.simulate, self.backend = get_simulator()
 
     def _evaluate(self, X, out, *args, **kwargs):
-        from spraydrylib.physics import fast_simulate_final
         F_vals = []
         for individuo in X:
             G_h = float(individuo[0])
@@ -71,10 +70,11 @@ class MOOSprayProblem(Problem):
             G_s = G_h / 3600.0
             
             p = self.base_params.copy(G=G_s, ri=rd_i)
-            ho, xo, t4 = fast_simulate_final(p, config=self.config, tf=self.tf)
+            sol = self.simulate(p, tf=self.tf, n_steps=self.n_steps, config=self.config)
             
+            Xo = sol["Xo"]
             f1 = contenido_energetico_kw(G_s, p.T_i, T_amb_K=self.config.T_amb)
-            f2 = float(xo)
+            f2 = float(np.mean(Xo[-20:-1]))
             
             if not np.isfinite(f1) or not np.isfinite(f2):
                 f1, f2 = 1e9, 1e9

@@ -158,8 +158,8 @@ class SprayDryer:
         t_eval = np.linspace(0.0, tf, N + 1)
         dt = float(tf) / N
         
-        # Intentar solver SciPy si method es 'auto', 'scipy' o 'rk45'
-        use_scipy = method in ["auto", "scipy", "rk45"]
+        # Intentar solver SciPy si method es 'scipy' o 'rk45'
+        use_scipy = method in ["scipy", "rk45"]
         if use_scipy:
             try:
                 from scipy.integrate import solve_ivp
